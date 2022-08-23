@@ -29,6 +29,7 @@ import tables_io
 import rail
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
+from rail.core.utils import RAILDIR
 
 def_bands = ['u', 'g', 'r', 'i', 'z', 'y']
 def_bandnames = [f"mag_{band}_lsst" for band in def_bands]
@@ -288,7 +289,7 @@ class BPZ_lite(CatEstimator):
 
         datapath = self.config['data_path']
         if datapath is None or datapath == "None":
-            tmpdatapath = os.path.join(RAILBPZ_DIR, "examples/estimation/data")
+            tmpdatapath = os.path.join(RAILDIR, "examples/estimation/data")
             os.environ["BPZDATAPATH"] = tmpdatapath
             self.data_path = tmpdatapath
         else:  # pragma: no cover
