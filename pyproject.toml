@@ -1,5 +1,5 @@
 [project]
-name = "rail-bpz"
+name = "pz-rail-bpz"
 description = "RAIL BPZ Interface"
 readme = "README.rst"
 requires-python = ">=3.8"
@@ -20,7 +20,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "rail",
+    "pz-rail",
     "DESC_BPZ @ git+https://github.com/LSSTDESC/DESC_BPZ",
 ]
 
