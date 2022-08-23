@@ -40,7 +40,7 @@ def_maglims = dict(mag_u_lsst=27.79,
                    mag_z_lsst=27.98,
                    mag_y_lsst=27.05)
 
-RAILBPZ_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+RAILBPZ_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 def nzfunc(z, z0, alpha, km, m, m0):  #pragma: no cover
     zm = z0 + (km * (m - m0))
