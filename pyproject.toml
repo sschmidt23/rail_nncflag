@@ -21,7 +21,6 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "pz-rail",
-    "DESC_BPZ @ git+https://github.com/LSSTDESC/DESC_BPZ",
 ]
 
 [project.optional-dependencies]
