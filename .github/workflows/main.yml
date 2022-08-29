@@ -5,7 +5,7 @@ name: rail
 
 on:
   push:
-    branches: [ main ]
+    branches: [ issue/4/pipbpz ]
   pull_request:
     branches: [ main ]
 
