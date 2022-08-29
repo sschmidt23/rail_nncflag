@@ -20,6 +20,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "desc-bpz",
     "pz-rail",
 ]
 
