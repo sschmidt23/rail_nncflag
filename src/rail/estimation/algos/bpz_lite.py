@@ -43,7 +43,8 @@ def_maglims = dict(mag_u_lsst=27.79,
 
 RAILBPZ_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-def nzfunc(z, z0, alpha, km, m, m0):  #pragma: no cover
+
+def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
     zm = z0 + (km * (m - m0))
     return np.power(z, alpha) * np.exp(-1. * np.power((z / zm), alpha))
 
@@ -115,7 +116,6 @@ class Inform_BPZ_lite(CatInformer):
         self.besttypes = None
         self.m0 = self.config.m0
 
-
     def _frac_likelihood(self, frac_params):
         ngal = len(self.mags)
         probs = np.zeros([self.ntyp, ngal])
@@ -158,17 +158,16 @@ class Inform_BPZ_lite(CatInformer):
         zm = z0 + (km * (mags - self.m0))
 
         # The normalization to the likelihood, which is needed here
-        I = zm ** (alpha + 1) * scipy.special.gamma(1 + 1 / alpha) / alpha
+        Inorm = zm ** (alpha + 1) * scipy.special.gamma(1 + 1 / alpha) / alpha
 
         # This is a vector of loglike per object
-        loglike = alpha * np.log(szs) - ((szs/zm)**alpha) - np.log(I)
+        loglike = alpha * np.log(szs) - ((szs / zm)**alpha) - np.log(Inorm)
 
         # We are minimizing not maximizing so return the negative
         mloglike = -(loglike.sum())
 
         print(params, mloglike)
         return mloglike
-
 
     def _find_dndz_params(self):
 
@@ -285,7 +284,6 @@ class BPZ_lite(CatEstimator):
         """Constructor, build the CatEstimator, then do BPZ specific setup
         """
         CatEstimator.__init__(self, args, comm=comm)
-        #self.model = None
 
         datapath = self.config['data_path']
         if datapath is None or datapath == "None":
@@ -335,7 +333,7 @@ class BPZ_lite(CatEstimator):
         for i, s in enumerate(spectra):
             for j, f in enumerate(filters):
                 model = f"{s}.{f}.AB"
-                if model not in ab_file_db:  #pragma: no cover
+                if model not in ab_file_db:  # pragma: no cover
                     self._make_new_ab_file(s, f)
                 model_path = os.path.join(data_path, "AB", model)
                 zo, f_mod_0 = get_data(model_path, (0, 1))
@@ -343,7 +341,7 @@ class BPZ_lite(CatEstimator):
 
         return flux_templates
 
-    def _make_new_ab_file(self, spectrum, filter_):  #pragma: no cover
+    def _make_new_ab_file(self, spectrum, filter_):  # pragma: no cover
         from desc_bpz.bpz_tools_py3 import ABflux
 
         new_file = f"{spectrum}.{filter_}.AB"
@@ -472,7 +470,7 @@ class BPZ_lite(CatEstimator):
 
         return post_z, zmode
 
-    def  _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start, end, data, first):
         """
         Run BPZ on a chunk of data
         """
