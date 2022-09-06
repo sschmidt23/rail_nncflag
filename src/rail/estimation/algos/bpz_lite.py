@@ -303,8 +303,6 @@ class BPZ_lite(CatEstimator):
             raise ValueError("Number of bands specified in band_names must be equal to number of mag errors specified in bad_err_names!")
         if self.config.prior_band not in self.config.band_names:  # pragma: no cover
             raise ValueError(f"prior band not found in bands specified in band_names: {str(self.config.band_names)}")
-        # load the template fluxes from the AB files
-        self.flux_templates = self._load_templates()
 
     def open_model(self, **kwargs):
         CatEstimator.open_model(self, **kwargs)
@@ -476,8 +474,11 @@ class BPZ_lite(CatEstimator):
 
     def  _process_chunk(self, start, end, data, first):
         """
-        This will likely mostly be copied from BPZPipe code
+        Run BPZ on a chunk of data
         """
+        # load the template fluxes from the AB files
+        self.flux_templates = self._load_templates()
+
         # replace non-detects, traditional BPZ had nondet=99 and err = maglim
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
