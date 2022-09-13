@@ -15,8 +15,8 @@ import scipy.special
 sci_ver_str = scipy.__version__.split('.')
 
 
-traindata = os.path.join(RAILDIR, 'tests/data/training_100gal.hdf5')
-validdata = os.path.join(RAILDIR, 'tests/data/validation_10gal.hdf5')
+traindata = os.path.join(RAILDIR, 'rail/examples/testdata/training_100gal.hdf5')
+validdata = os.path.join(RAILDIR, 'rail/examples/testdata/validation_10gal.hdf5')
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
 
@@ -55,7 +55,7 @@ def test_bpz_lite():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(bpz_lite.RAILBPZ_DIR, "examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAILDIR, "rail/examples/estimation/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'no_prior': False,
@@ -81,7 +81,7 @@ def test_bpz_wHDFN_prior():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(bpz_lite.RAILBPZ_DIR, "examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAILDIR, "rail/examples/estimation/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'bands': 'ugrizy',
@@ -111,7 +111,7 @@ def test_bpz_lite_wkernel_flatprior():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(bpz_lite.RAILBPZ_DIR, "examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAILDIR, "rail/examples/estimation/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'bands': 'ugrizy',
