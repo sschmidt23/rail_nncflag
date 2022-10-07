@@ -300,6 +300,31 @@ class BPZ_lite(CatEstimator):
         if self.config.prior_band not in self.config.band_names:  # pragma: no cover
             raise ValueError(f"prior band not found in bands specified in band_names: {str(self.config.band_names)}")
 
+    def _initialize_run(self):
+        super()._initialize_run()
+
+        # If we are not the root process then we wait for
+        # the root to (potentially) create all the templates before
+        # reading them ourselves.
+        if self.rank > 0:
+            # The Barrier method causes all processes to stop
+            # until all the others have also reached the barrier.
+            # If our rank is > 0 then we must be running under MPI.
+            self.comm.Barrier()
+            self.flux_templates = self._load_templates()
+        # But if we are the root process then we just go
+        # ahead and load them before getting to the Barrier,
+        # which will allow the other processes to continue
+        else:
+            self.flux_templates = self._load_templates()
+            # We might only be running in serial, so check.
+            # If we are running MPI, then now we have created
+            # the templates we let all the other processes that
+            # stopped at the Barrier above continue and read them.
+            if self.is_mpi():
+                self.comm.Barrier()
+
+
     def open_model(self, **kwargs):
         CatEstimator.open_model(self, **kwargs)
         self.modeldict = self.model
@@ -324,8 +349,11 @@ class BPZ_lite(CatEstimator):
         nz = len(z)
         flux_templates = np.zeros((nz, nt, nf))
 
+        ab_dir = os.path.join(data_path, "AB")
+        os.makedirs(ab_dir, exist_ok=True)
+
         # make a list of all available AB files in the AB directory
-        ab_file_list = glob.glob(os.path.join(data_path, "AB") + "/*.AB")
+        ab_file_list = glob.glob(ab_dir + "/*.AB")
         ab_file_db = [os.path.split(x)[-1] for x in ab_file_list]
 
         for i, s in enumerate(spectra):
@@ -472,9 +500,6 @@ class BPZ_lite(CatEstimator):
         """
         Run BPZ on a chunk of data
         """
-        # load the template fluxes from the AB files
-        self.flux_templates = self._load_templates()
-
         # replace non-detects, traditional BPZ had nondet=99 and err = maglim
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
