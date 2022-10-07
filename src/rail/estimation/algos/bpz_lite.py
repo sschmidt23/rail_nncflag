@@ -306,7 +306,7 @@ class BPZ_lite(CatEstimator):
         # If we are not the root process then we wait for
         # the root to (potentially) create all the templates before
         # reading them ourselves.
-        if self.rank > 0:
+        if self.rank > 0: # pragma: no cover
             # The Barrier method causes all processes to stop
             # until all the others have also reached the barrier.
             # If our rank is > 0 then we must be running under MPI.
@@ -321,7 +321,7 @@ class BPZ_lite(CatEstimator):
             # If we are running MPI, then now we have created
             # the templates we let all the other processes that
             # stopped at the Barrier above continue and read them.
-            if self.is_mpi():
+            if self.is_mpi(): # pragma: no cover
                 self.comm.Barrier()
 
 
