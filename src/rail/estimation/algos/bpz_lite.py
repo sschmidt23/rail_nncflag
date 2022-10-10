@@ -29,6 +29,7 @@ import tables_io
 import rail
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
+from rail.estimation.algos import bpz_version
 from rail.core.utils import RAILDIR
 
 def_bands = ['u', 'g', 'r', 'i', 'z', 'y']
@@ -40,6 +41,8 @@ def_maglims = dict(mag_u_lsst=27.79,
                    mag_i_lsst=28.62,
                    mag_z_lsst=27.98,
                    mag_y_lsst=27.05)
+
+BPZ_RAIL_DIR = os.path.abspath(os.path.join(os.path.dirname(bpz_version.__file__), '..', '..', '..'))
 
 
 def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
@@ -83,7 +86,7 @@ class Inform_BPZ_lite(CatInformer):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + rail/examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAILDIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                          columns_file=Param(str, os.path.join(BPZ_RAIL_DIR, 'examples/estimation/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
                           spectra_file=Param(str, 'SED/CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
@@ -253,7 +256,7 @@ class BPZ_lite(CatEstimator):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + ../examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAILDIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                          columns_file=Param(str, os.path.join(BPZ_RAIL_DIR, 'examples/estimation/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
                           spectra_file=Param(str, 'SED/CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
