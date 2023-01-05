@@ -26,7 +26,6 @@ import scipy.integrate
 import glob
 import qp
 import tables_io
-import rail
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.estimation.algos import bpz_version
@@ -246,7 +245,7 @@ class BPZ_lite(CatEstimator):
     tb: integer specifying the best-fit SED *at the redshift mode*
     todds: fraction of marginalized posterior prob. of best template,
     so lower numbers mean other templates could be better fits, likely
-    at other redshifts    
+    at other redshifts
     """
     name = "BPZ_lite"
     config_options = CatEstimator.config_options.copy()
@@ -317,7 +316,7 @@ class BPZ_lite(CatEstimator):
         # If we are not the root process then we wait for
         # the root to (potentially) create all the templates before
         # reading them ourselves.
-        if self.rank > 0: # pragma: no cover
+        if self.rank > 0:  # pragma: no cover
             # The Barrier method causes all processes to stop
             # until all the others have also reached the barrier.
             # If our rank is > 0 then we must be running under MPI.
@@ -332,9 +331,8 @@ class BPZ_lite(CatEstimator):
             # If we are running MPI, then now we have created
             # the templates we let all the other processes that
             # stopped at the Barrier above continue and read them.
-            if self.is_mpi(): # pragma: no cover
+            if self.is_mpi():  # pragma: no cover
                 self.comm.Barrier()
-
 
     def open_model(self, **kwargs):
         CatEstimator.open_model(self, **kwargs)
@@ -514,7 +512,6 @@ class BPZ_lite(CatEstimator):
         # relative to the other templates
         tmarg = post.sum(axis=0)
         todds = tmarg[t_b] / np.sum(tmarg)
-                           
 
         return post_z, zmode, t_b, todds
 
