@@ -409,7 +409,7 @@ class BPZ_lite(CatEstimator):
             if np.isnan(self.config.unobserved_val):  # pragma: no cover
                 obsmask = np.isnan(data[bandname])
             else:
-                obsmask = np.isclose(data[bandname], self.config.nondetect_val)
+                obsmask = np.isclose(data[bandname], self.config.unobserved_val)
             data[bandname][obsmask] = -99.0
             data[errname][obsmask] = 20.0
 
