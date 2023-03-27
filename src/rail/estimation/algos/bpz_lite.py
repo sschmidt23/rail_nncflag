@@ -257,6 +257,7 @@ class BPZ_lite(CatEstimator):
                           band_err_names=Param(list, def_errnames,
                                                msg="band error column names to be used * ASSUMED TO BE IN INCREASING WL ORDER!*"),
                           nondetect_val=Param(float, 99.0, msg="value to be replaced with magnitude limit for non detects"),
+                          unobserved_val=Param(float, -99.0, msg="value to be replaced with zero flux and given large errors for non-observed filters"),
                           data_path=Param(str, "None",
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
@@ -400,6 +401,18 @@ class BPZ_lite(CatEstimator):
                 detmask = np.isclose(data[bandname], self.config.nondetect_val)
             data[bandname][detmask] = 99.0
             data[errname][detmask] = self.config.mag_limits[bandname]
+
+        # replace non-observations with -99, again to match BPZ standard
+        # below the fluxes for these will be set to zero but with enormous
+        # flux errors
+        for bandname, errname in zip(bands, errs):
+            if np.isnan(self.config.unobserved_val):  # pragma: no cover
+                obsmask = np.isnan(data[bandname])
+            else:
+                obsmask = np.isclose(data[bandname], self.config.unobserved_val)
+            data[bandname][obsmask] = -99.0
+            data[errname][obsmask] = 20.0
+
 
         # Only one set of mag errors
         mag_errs = np.array([data[er] for er in errs]).T
