@@ -28,7 +28,6 @@ import qp
 import tables_io
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
-from rail.estimation.algos import bpz_version
 from rail.core.utils import RAILDIR
 from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
 
@@ -122,12 +121,13 @@ class Inform_BPZ_lite(CatInformer):
         ktarr = frac_params[self.ntyp - 1:]
         for i in range(self.ntyp - 1):
             probs[i, :] = [foarr[i] * np.exp(-1. * ktarr[i] * (mag - self.m0)) for mag in self.mags]
-        # set the probability of last element to 1 - sum of the others to keep normalized
-        # this is the weird way BPZ does things, though it does it with the last
+        # set the probability of last element to 1 - sum of the others to
+        # keep normalized, this is the way BPZ does things
         probs[self.ntyp - 1, :] = 1. - np.sum(probs[:-1, :], axis=0)
         likelihood = 0.0
         for i, typ in enumerate(self.besttypes):
-            likelihood += -2. * np.log10(probs[typ, i])
+            if probs[typ, i] > 0.0:
+                likelihood += -2. * np.log10(probs[typ, i])
         return likelihood
 
     def _find_fractions(self):
@@ -136,7 +136,7 @@ class Inform_BPZ_lite(CatInformer):
             fo_init = np.array([1.0])
             kt_init = np.array([self.config.init_kt])
         else:
-            fo_init = np.ones(self.ntyp - 1) / (self.ntyp - 1)
+            fo_init = np.ones(self.ntyp - 1) / (self.ntyp)
             kt_init = np.ones(self.ntyp - 1) * self.config.init_kt
         fracparams = np.hstack([fo_init, kt_init])
         # run scipy optimize to find best params
@@ -165,7 +165,7 @@ class Inform_BPZ_lite(CatInformer):
         # We are minimizing not maximizing so return the negative
         mloglike = -(loglike.sum())
 
-        print(params, mloglike)
+        # print(params, mloglike)
         return mloglike
 
     def _find_dndz_params(self):
@@ -182,6 +182,7 @@ class Inform_BPZ_lite(CatInformer):
             zo_arr[i] = result[0]
             a_arr[i] = result[1]
             km_arr[i] = result[2]
+            print(f"best fit z0, alpha, km for type {i}: {result}")
         return zo_arr, km_arr, a_arr
 
     def _get_broad_type(self, ngal):
@@ -216,6 +217,10 @@ class Inform_BPZ_lite(CatInformer):
         ref_mags = training_data[self.config.prior_band]
         mask = ((ref_mags >= self.config.mmin) & (ref_mags <= self.config.mmax))
         self.mags = ref_mags[mask]
+        # To not screw up likelihood calculation, set objs with mag
+        # brighter than m0 to value of m0
+        brightmask = (self.mags < self.m0)
+        self.mags[brightmask] = self.m0
         self.szs = training_data[self.config.redshift_col][mask]
         self.besttypes = broad_types[mask]
 
@@ -473,8 +478,8 @@ class BPZ_lite(CatEstimator):
         return data
 
     def _estimate_pdf(self, flux_templates, kernel, flux, flux_err, mag_0, z):
-
-        from desc_bpz.bpz_tools_py3 import p_c_z_t, prior_with_dict
+        from desc_bpz.bpz_tools_py3 import p_c_z_t
+        from desc_bpz.prior_from_dict import prior_function
 
         modeldict = self.modeldict
         p_min = self.config.p_min
@@ -489,7 +494,9 @@ class BPZ_lite(CatEstimator):
         if self.config.no_prior:  # pragma: no cover
             P = np.ones(L.shape)
         else:
-            P = prior_with_dict(z, mag_0, modeldict, nt)  # hardcode interp 0
+            # set num templates to nt, which is hardcoding to "interp=0"
+            # in BPZ, i.e. do not create any interpolated templates
+            P = prior_function(z, mag_0, modeldict, nt)
 
         post = L * P
         # Right now we jave the joint PDF of p(z,template). Marginalize
