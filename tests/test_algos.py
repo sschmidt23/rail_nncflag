@@ -16,10 +16,10 @@ from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
 import scipy.special
 sci_ver_str = scipy.__version__.split('.')
 
-
-traindata = os.path.join(RAILDIR, "rail/examples/testdata/training_100gal.hdf5")
-validdata = os.path.join(RAILDIR, "rail/examples/testdata/validation_10gal.hdf5")
 parquetdata = "./tests/validation_10gal.pq"
+traindata = os.path.join(RAILDIR, 'rail/examples_data/testdata/training_100gal.hdf5')
+validdata = os.path.join(RAILDIR, 'rail/examples_data/testdata/validation_10gal.hdf5')
+
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
 
@@ -58,7 +58,7 @@ def test_bpz_lite():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'no_prior': False,
@@ -90,7 +90,7 @@ def test_bpz_wHDFN_prior(inputdata, groupname):
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'bands': 'ugrizy',
@@ -102,7 +102,7 @@ def test_bpz_wHDFN_prior(inputdata, groupname):
                          'mag_err_min': 0.005,
                          'hdf5_groupname': groupname,
                          'nt_array': [1, 2, 5],
-                         'model': os.path.join(RAILDIR, "rail/examples/estimation/CWW_HDFN_prior.pkl")}
+                         'model': './examples_data/estimation_data/CWW_HDFN_prior.pkl'}
     zb_expected = np.array([0.18, 2.88, 0.12, 0.15, 2.97, 2.78, 0.11, 0.19,
                             2.98, 2.92])
 
@@ -120,7 +120,7 @@ def test_bpz_lite_wkernel_flatprior():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'bands': 'ugrizy',
