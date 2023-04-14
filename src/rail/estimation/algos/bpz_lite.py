@@ -83,8 +83,8 @@ class Inform_BPZ_lite(CatInformer):
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
-                                          "directory for rail + rail/examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                                          "directory for rail + rail/examples_data/estimation_data/data"),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples_data/estimation_data/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
                           spectra_file=Param(str, 'SED/CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
@@ -268,8 +268,8 @@ class BPZ_lite(CatEstimator):
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
-                                          "directory for rail + ../examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                                          "directory for rail + ../examples_data/estimation_data/data"),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples_data/estimation_data/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
                           spectra_file=Param(str, 'SED/CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
@@ -301,7 +301,7 @@ class BPZ_lite(CatEstimator):
 
         datapath = self.config['data_path']
         if datapath is None or datapath == "None":
-            tmpdatapath = os.path.join(RAILDIR, "rail/examples/estimation/data")
+            tmpdatapath = os.path.join(RAILDIR, "rail/examples_data/estimation_data/data")
             os.environ["BPZDATAPATH"] = tmpdatapath
             self.data_path = tmpdatapath
         else:  # pragma: no cover
