@@ -85,8 +85,6 @@ class Inform_BPZ_lite(CatInformer):
                                           "directory for rail + rail/examples/estimation/data"),
                           columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
-                                             msg="name of the file specifying the list of SEDs to use"),
                           m0=Param(float, 20.0, msg="reference apparent mag, used in prior param"),
                           nt_array=Param(list, [1, 2, 3], msg="list of integer number of templates per 'broad type', "
                                          "must be in same order as the template set, and must sum to the same number "
@@ -270,7 +268,7 @@ class BPZ_lite(CatEstimator):
                                           "directory for rail + ../examples/estimation/data"),
                           columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
+                          spectra_file=Param(str, 'CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
                           madau_flag=Param(str, 'no',
                                            msg="set to 'yes' or 'no' to set whether to include intergalactic "
@@ -355,7 +353,7 @@ class BPZ_lite(CatEstimator):
         ignore_rows = ['M_0', 'OTHER', 'ID', 'Z_S']
         filters = [f for f in get_str(columns_file, 0) if f not in ignore_rows]
 
-        spectra_file = os.path.join(data_path, self.config.spectra_file)
+        spectra_file = os.path.join(data_path, "SED", self.config.spectra_file)
         spectra = [s[:-4] for s in get_str(spectra_file)]
 
         nt = len(spectra)
