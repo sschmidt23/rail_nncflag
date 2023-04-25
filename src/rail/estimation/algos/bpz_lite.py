@@ -84,9 +84,9 @@ class Inform_BPZ_lite(CatInformer):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + rail/examples_data/estimation_data/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples_data/estimation_data/configs/test_bpz.columns'),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
+                          spectra_file=Param(str, "SED/CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           m0=Param(float, 20.0, msg="reference apparent mag, used in prior param"),
                           nt_array=Param(list, [1, 2, 3], msg="list of integer number of templates per 'broad type', "
@@ -142,7 +142,7 @@ class Inform_BPZ_lite(CatInformer):
         fracparams = np.hstack([fo_init, kt_init])
         # run scipy optimize to find best params
         # note that best fit vals are stored as "x" for some reason
-        frac_results = sciop.minimize(self._frac_likelihood, fracparams, method='nelder-mead').x
+        frac_results = sciop.minimize(self._frac_likelihood, fracparams, method="nelder-mead").x
         if self.ntyp == 1:
             self.fo_arr = np.array([frac_results[0]])
             self.kt_arr = np.array([frac_results[1]])
@@ -179,7 +179,7 @@ class Inform_BPZ_lite(CatInformer):
             print(f"minimizing for type {i}")
             self.typmask = (self.besttypes == i)
             dndzparams = np.hstack([self.config.init_zo, self.config.init_alpha, self.config.init_km])
-            result = sciop.minimize(self._dndz_likelihood, dndzparams, method='nelder-mead').x
+            result = sciop.minimize(self._dndz_likelihood, dndzparams, method="nelder-mead").x
             zo_arr[i] = result[0]
             a_arr[i] = result[1]
             km_arr[i] = result[2]
@@ -191,7 +191,7 @@ class Inform_BPZ_lite(CatInformer):
         if typefile == "":  # pragma: no cover
             typedata = np.zeros(ngal, dtype=int)
         else:
-            typedata = tables_io.read(typefile)['types']  # pragma: no cover
+            typedata = tables_io.read(typefile)["types"]  # pragma: no cover
         numtypes = len(list(set(typedata)))
         return numtypes, typedata
 
@@ -269,7 +269,7 @@ class BPZ_lite(CatEstimator):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + ../examples_data/estimation_data/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples_data/estimation_data/configs/test_bpz.columns'),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                                              msg="name of the file specifying the columns"),
                           spectra_file=Param(str, 'SED/CWWSB4.list',
                                              msg="name of the file specifying the list of SEDs to use"),
