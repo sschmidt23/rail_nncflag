@@ -69,7 +69,7 @@ class Inform_BPZ_lite(CatInformer):
     z0, km, and a for each type.  These parameters are then fed to the BPZ
     prior for use in the estimation stage.
     """
-    name = 'Inform_BPZ_lite'
+    name = "Inform_BPZ_lite"
     config_options = CatInformer.config_options.copy()
     config_options.update(zmin=Param(float, 0.0, msg="min z for grid"),
                           zmax=Param(float, 3.0, msg="max z for grid"),
@@ -200,9 +200,9 @@ class Inform_BPZ_lite(CatInformer):
         """
         self.m0 = self.config.m0
         if self.config.hdf5_groupname:
-            training_data = self.get_data('input')[self.config.hdf5_groupname]
+            training_data = self.get_data("input")[self.config.hdf5_groupname]
         else:  # pragma: no cover
-            training_data = self.get_data('input')
+            training_data = self.get_data("input")
 
         ngal = len(training_data[self.config.prior_band])
 
@@ -238,7 +238,7 @@ class Inform_BPZ_lite(CatInformer):
         self.model = dict(fo_arr=self.fo_arr, kt_arr=self.kt_arr, zo_arr=zo_arr,
                           km_arr=km_arr, a_arr=a_arr, mo=self.config.m0,
                           nt_array=self.config.nt_array)
-        self.add_data('model', self.model)
+        self.add_data("model", self.model)
 
 
 class BPZ_lite(CatEstimator):
@@ -271,14 +271,14 @@ class BPZ_lite(CatEstimator):
                                           "directory for rail + ../examples_data/estimation_data/data"),
                           columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
+                          spectra_file=Param(str, "SED/CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
-                          madau_flag=Param(str, 'no',
+                          madau_flag=Param(str, "no",
                                            msg="set to 'yes' or 'no' to set whether to include intergalactic "
                                                "Madau reddening when constructing model fluxes"),
                           mag_limits=Param(dict, def_maglims, msg="1 sigma mag limits"),
                           no_prior=Param(bool, "False", msg="set to True if you want to run with no prior"),
-                          prior_band=Param(str, 'mag_i_lsst',
+                          prior_band=Param(str, "mag_i_lsst",
                                            msg="specifies which band the magnitude/type prior is trained in, e.g. 'i'"),
                           p_min=Param(float, 0.005,
                                       msg="BPZ sets all values of "
@@ -299,14 +299,14 @@ class BPZ_lite(CatEstimator):
         """
         CatEstimator.__init__(self, args, comm=comm)
 
-        datapath = self.config['data_path']
+        datapath = self.config["data_path"]
         if datapath is None or datapath == "None":
             tmpdatapath = os.path.join(RAILDIR, "rail/examples_data/estimation_data/data")
             os.environ["BPZDATAPATH"] = tmpdatapath
             self.data_path = tmpdatapath
         else:  # pragma: no cover
             self.data_path = datapath
-            os.environ['BPZDATAPATH'] = self.data_path
+            os.environ["BPZDATAPATH"] = self.data_path
         if not os.path.exists(self.data_path):  # pragma: no cover
             raise FileNotFoundError("BPZDATAPATH " + self.data_path + " does not exist! Check value of data_path in config file!")
 
@@ -353,7 +353,7 @@ class BPZ_lite(CatEstimator):
 
         data_path = self.data_path
         columns_file = self.config.columns_file
-        ignore_rows = ['M_0', 'OTHER', 'ID', 'Z_S']
+        ignore_rows = ["M_0", "OTHER", "ID", "Z_S"]
         filters = [f for f in get_str(columns_file, 0) if f not in ignore_rows]
 
         spectra_file = os.path.join(data_path, self.config.spectra_file)

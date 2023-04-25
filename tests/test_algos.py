@@ -102,7 +102,7 @@ def test_bpz_wHDFN_prior(inputdata, groupname):
                          'mag_err_min': 0.005,
                          'hdf5_groupname': groupname,
                          'nt_array': [1, 2, 5],
-                         'model': './examples_data/estimation_data/CWW_HDFN_prior.pkl'}
+                         'model': os.path.join(RAILDIR, 'rail/examples_data/estimation_data/data/CWW_HDFN_prior.pkl')}
     zb_expected = np.array([0.18, 2.88, 0.12, 0.15, 2.97, 2.78, 0.11, 0.19,
                             2.98, 2.92])
 
