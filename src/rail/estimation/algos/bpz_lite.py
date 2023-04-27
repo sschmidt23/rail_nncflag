@@ -394,6 +394,8 @@ class BPZ_lite(CatEstimator):
         bands = self.config.band_names
         errs = self.config.band_err_names
 
+        fluxdict = {}
+        
         # Load the magnitudes
         zp_frac = e_mag2frac(np.array(self.config.zp_errors))
 
@@ -471,11 +473,13 @@ class BPZ_lite(CatEstimator):
         flux[unobserved] = 0.0
         flux_err[unobserved] = 1e108
 
-        # Upate the input dictionary with new things we have calculated
-        data['flux'] = flux
-        data['flux_err'] = flux_err
-        data['mags'] = mags
-        return data
+        # Upate the flux dictionary with new things we have calculated
+        fluxdict['flux'] = flux
+        fluxdict['flux_err'] = flux_err
+        m_0_col = self.config.band_names.index(self.config.prior_band)
+        fluxdict['mag0'] = mags[:, m_0_col]
+        
+        return fluxdict
 
     def _estimate_pdf(self, flux_templates, kernel, flux, flux_err, mag_0, z):
         from desc_bpz.bpz_tools_py3 import p_c_z_t
@@ -541,10 +545,9 @@ class BPZ_lite(CatEstimator):
         # replace non-detects, traditional BPZ had nondet=99 and err = maglim
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
-        m_0_col = self.config.band_names.index(self.config.prior_band)
 
         nz = len(self.zgrid)
-        ng = test_data['mags'].shape[0]
+        ng = test_data['flux'].shape[0]
 
         # Set up Gauss kernel for extra smoothing, if needed
         if self.config.gauss_kernel > 0:  # pragma: no cover
@@ -564,7 +567,7 @@ class BPZ_lite(CatEstimator):
         zgrid = self.zgrid
         # Loop over all ng galaxies!
         for i in range(ng):
-            mag_0 = test_data['mags'][i, m_0_col]
+            mag_0 = test_data['mag0'][i]
             flux = test_data['flux'][i]
             flux_err = test_data['flux_err'][i]
             pdfs[i], zmode[i], tb[i], todds[i] = self._estimate_pdf(flux_temps,
@@ -572,10 +575,6 @@ class BPZ_lite(CatEstimator):
                                                                     flux_err, mag_0,
                                                                     zgrid)
             zmean[i] = (zgrid * pdfs[i]).sum() / pdfs[i].sum()
-        # remove the keys added to the data file by BPZ
-        test_data.pop('flux', None)
-        test_data.pop('flux_err', None)
-        test_data.pop('mags', None)
         qp_dstn = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=pdfs))
         qp_dstn.set_ancil(dict(zmode=zmode, zmean=zmean, tb=tb, todds=todds))
         self._do_chunk_output(qp_dstn, start, end, first)
