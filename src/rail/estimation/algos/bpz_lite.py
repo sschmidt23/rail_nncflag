@@ -22,6 +22,7 @@ Missing from full BPZ:
 import os
 import numpy as np
 import scipy.optimize as sciop
+import pandas as pd
 import scipy.integrate
 import glob
 import qp
@@ -406,8 +407,12 @@ class BPZ_lite(CatEstimator):
                 detmask = np.isnan(data[bandname])
             else:
                 detmask = np.isclose(data[bandname], self.config.nondetect_val)
-            data[bandname][detmask] = 99.0
-            data[errname][detmask] = self.config.mag_limits[bandname]
+            if isinstance(data, pd.DataFrame):
+                data.loc[detmask, bandname] = 99.0
+                data.loc[detmask, errname] = self.config.mag_limits[bandname]
+            else:
+                data[bandname][detmask] = 99.0
+                data[errname][detmask] = self.config.mag_limits[bandname]
 
         # replace non-observations with -99, again to match BPZ standard
         # below the fluxes for these will be set to zero but with enormous
@@ -417,8 +422,12 @@ class BPZ_lite(CatEstimator):
                 obsmask = np.isnan(data[bandname])
             else:
                 obsmask = np.isclose(data[bandname], self.config.unobserved_val)
-            data[bandname][obsmask] = -99.0
-            data[errname][obsmask] = 20.0
+            if isinstance(data, pd.DataFrame):
+                data.loc[obsmask, bandname] = -99.0
+                data.loc[obsmask, errname] = 20.0
+            else:
+                data[bandname][obsmask] = -99.0
+                data[errname][obsmask] = 20.0
 
 
         # Only one set of mag errors
