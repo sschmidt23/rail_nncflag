@@ -21,7 +21,9 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "desc-bpz",
+    "pandas",
     "pz-rail",
+    "tables-io[full]",
 ]
 
 [project.optional-dependencies]
