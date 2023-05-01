@@ -17,8 +17,9 @@ import scipy.special
 sci_ver_str = scipy.__version__.split('.')
 
 
-traindata = os.path.join(RAILDIR, 'rail/examples/testdata/training_100gal.hdf5')
-validdata = os.path.join(RAILDIR, 'rail/examples/testdata/validation_10gal.hdf5')
+traindata = os.path.join(RAILDIR, "rail/examples/testdata/training_100gal.hdf5")
+validdata = os.path.join(RAILDIR, "rail/examples/testdata/validation_10gal.hdf5")
+parquetdata = "./tests/validation_10gal.pq"
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
 
@@ -77,8 +78,14 @@ def test_bpz_lite():
     assert np.isclose(results.ancil['zmode'], zb_expected).all()
     assert np.isclose(results.ancil['zmode'], rerun_results.ancil['zmode']).all()
 
-
-def test_bpz_wHDFN_prior():
+@pytest.mark.parametrize(
+    "inputdata, groupname",
+    [
+        (parquetdata, ""),
+        (validdata, "photometry")
+        ]
+)
+def test_bpz_wHDFN_prior(inputdata, groupname):
     estim_config_dict = {'zmin': 0.0, 'zmax': 3.0,
                          'dz': 0.01,
                          'nzbins': 301,
@@ -93,13 +100,13 @@ def test_bpz_wHDFN_prior():
                          'gauss_kernel': 0.1,
                          'zp_errors': np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01]),
                          'mag_err_min': 0.005,
-                         'hdf5_groupname': 'photometry',
+                         'hdf5_groupname': groupname,
                          'nt_array': [1, 2, 5],
-                         'model': './examples/estimation/CWW_HDFN_prior.pkl'}
+                         'model': os.path.join(RAILDIR, "rail/examples/estimation/CWW_HDFN_prior.pkl")}
     zb_expected = np.array([0.18, 2.88, 0.12, 0.15, 2.97, 2.78, 0.11, 0.19,
                             2.98, 2.92])
 
-    validation_data = DS.read_file('validation_data', TableHandle, validdata)
+    validation_data = DS.read_file('validation_data', TableHandle, inputdata)
     pz = bpz_lite.BPZ_lite.make_stage(name='bpz_hdfn', **estim_config_dict)
     results = pz.estimate(validation_data)
     assert np.isclose(results.data.ancil['zmode'], zb_expected).all()
