@@ -30,17 +30,9 @@ import tables_io
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.core.utils import RAILDIR
-from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
+from rail.bpz.utils import RAIL_BPZ_DIR
+from rail.core.common_params import SHARED_PARAMS
 
-def_bands = ['u', 'g', 'r', 'i', 'z', 'y']
-def_bandnames = [f"mag_{band}_lsst" for band in def_bands]
-def_errnames = [f"mag_err_{band}_lsst" for band in def_bands]
-def_maglims = dict(mag_u_lsst=27.79,
-                   mag_g_lsst=29.04,
-                   mag_r_lsst=29.06,
-                   mag_i_lsst=28.62,
-                   mag_z_lsst=27.98,
-                   mag_y_lsst=27.05)
 
 
 def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
@@ -71,14 +63,15 @@ class Inform_BPZ_lite(CatInformer):
     """
     name = "Inform_BPZ_lite"
     config_options = CatInformer.config_options.copy()
-    config_options.update(zmin=Param(float, 0.0, msg="min z for grid"),
-                          zmax=Param(float, 3.0, msg="max z for grid"),
-                          nzbins=Param(int, 301, msg="# of bins in zgrid"),
-                          band_names=Param(list, def_bandnames,
-                                           msg="band names to be used, *ASSUMED TO BE IN INCREASING WL ORDER!*"),
-                          band_err_names=Param(list, def_errnames,
-                                               msg="band error column names to be used * ASSUMED TO BE IN INCREASING WL ORDER!*"),
-                          nondetect_val=Param(float, 99.0, msg="value to be replaced with magnitude limit for non detects"),
+    config_options.update(zmin=SHARED_PARAMS,
+                          zmax=SHARED_PARAMS,
+                          nzbins=SHARED_PARAMS,
+                          nondetect_val=SHARED_PARAMS,
+                          mag_limits=SHARED_PARAMS,
+                          bands=SHARED_PARAMS,
+                          err_bands=SHARED_PARAMS,
+                          ref_band=SHARED_PARAMS,
+                          redshift_col=SHARED_PARAMS,   
                           data_path=Param(str, "None",
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
@@ -98,8 +91,6 @@ class Inform_BPZ_lite(CatInformer):
                           init_zo=Param(float, 0.4, msg="initial guess for z0 in training"),
                           init_alpha=Param(float, 1.8, msg="initial guess for alpha in training"),
                           init_km=Param(float, 0.1, msg="initial guess for km in training"),
-                          prior_band=Param(str, "mag_i_lsst", msg="referene band, which column to use in training prior"),
-                          redshift_col=Param(str, "redshift", msg="name for redshift column in training data"),
                           type_file=Param(str, "", msg="name of file with the broad type fits for the training data"))
 
     def __init__(self, args, comm=None):
@@ -204,10 +195,10 @@ class Inform_BPZ_lite(CatInformer):
         else:  # pragma: no cover
             training_data = self.get_data("input")
 
-        ngal = len(training_data[self.config.prior_band])
+        ngal = len(training_data[self.config.ref_band])
 
-        if self.config.prior_band not in training_data.keys():  # pragma: no cover
-            raise KeyError(f"prior_band {self.config.prior_band} not found in input data!")
+        if self.config.ref_band not in training_data.keys():  # pragma: no cover
+            raise KeyError(f"ref_band {self.config.ref_band} not found in input data!")
         if self.config.redshift_col not in training_data.keys():  # pragma: no cover
             raise KeyError(f"redshift column {self.config.redshift_col} not found in input data!")
 
@@ -215,7 +206,7 @@ class Inform_BPZ_lite(CatInformer):
         Ntyp, broad_types = self._get_broad_type(ngal)
         self.ntyp = Ntyp
         # trim data to between mmin and mmax
-        ref_mags = training_data[self.config.prior_band]
+        ref_mags = training_data[self.config.ref_band]
         mask = ((ref_mags >= self.config.mmin) & (ref_mags <= self.config.mmax))
         self.mags = ref_mags[mask]
         # To not screw up likelihood calculation, set objs with mag
@@ -254,15 +245,16 @@ class BPZ_lite(CatEstimator):
     """
     name = "BPZ_lite"
     config_options = CatEstimator.config_options.copy()
-    config_options.update(zmin=Param(float, 0.0, msg="min z for grid"),
-                          zmax=Param(float, 3.0, msg="max z for grid"),
+    config_options.update(zmin=SHARED_PARAMS,
+                          zmax=SHARED_PARAMS,
+                          nzbins=SHARED_PARAMS,
+                          nondetect_val=SHARED_PARAMS,
+                          mag_limits=SHARED_PARAMS,
+                          bands=SHARED_PARAMS,
+                          ref_band=SHARED_PARAMS,
+                          err_bands=SHARED_PARAMS,
+                          redshift_col=SHARED_PARAMS,   
                           dz=Param(float, 0.01, msg="delta z in grid"),
-                          nzbins=Param(int, 301, msg="# of bins in zgrid"),
-                          band_names=Param(list, def_bandnames,
-                                           msg="band names to be used, *ASSUMED TO BE IN INCREASING WL ORDER!*"),
-                          band_err_names=Param(list, def_errnames,
-                                               msg="band error column names to be used * ASSUMED TO BE IN INCREASING WL ORDER!*"),
-                          nondetect_val=Param(float, 99.0, msg="value to be replaced with magnitude limit for non detects"),
                           unobserved_val=Param(float, -99.0, msg="value to be replaced with zero flux and given large errors for non-observed filters"),
                           data_path=Param(str, "None",
                                           msg="data_path (str): file path to the "
@@ -276,10 +268,7 @@ class BPZ_lite(CatEstimator):
                           madau_flag=Param(str, "no",
                                            msg="set to 'yes' or 'no' to set whether to include intergalactic "
                                                "Madau reddening when constructing model fluxes"),
-                          mag_limits=Param(dict, def_maglims, msg="1 sigma mag limits"),
                           no_prior=Param(bool, "False", msg="set to True if you want to run with no prior"),
-                          prior_band=Param(str, "mag_i_lsst",
-                                           msg="specifies which band the magnitude/type prior is trained in, e.g. 'i'"),
                           p_min=Param(float, 0.005,
                                       msg="BPZ sets all values of "
                                       "the PDF that are below p_min*peak_value to 0.0, "
@@ -311,10 +300,10 @@ class BPZ_lite(CatEstimator):
             raise FileNotFoundError("BPZDATAPATH " + self.data_path + " does not exist! Check value of data_path in config file!")
 
         # check on bands, errs, and prior band
-        if len(self.config.band_names) != len(self.config.band_err_names):  # pragma: no cover
-            raise ValueError("Number of bands specified in band_names must be equal to number of mag errors specified in bad_err_names!")
-        if self.config.prior_band not in self.config.band_names:  # pragma: no cover
-            raise ValueError(f"prior band not found in bands specified in band_names: {str(self.config.band_names)}")
+        if len(self.config.bands) != len(self.config.err_bands):  # pragma: no cover
+            raise ValueError("Number of bands specified in bands must be equal to number of mag errors specified in err_bands!")
+        if self.config.ref_band not in self.config.bands:  # pragma: no cover
+            raise ValueError(f"reference band not found in bands specified in bands: {str(self.config.bands)}")
 
     def _initialize_run(self):
         super()._initialize_run()
@@ -392,8 +381,8 @@ class BPZ_lite(CatEstimator):
     def _preprocess_magnitudes(self, data):
         from desc_bpz.bpz_tools_py3 import e_mag2frac
 
-        bands = self.config.band_names
-        errs = self.config.band_err_names
+        bands = self.config.bands
+        errs = self.config.err_bands
 
         fluxdict = {}
         
@@ -485,7 +474,7 @@ class BPZ_lite(CatEstimator):
         # Upate the flux dictionary with new things we have calculated
         fluxdict['flux'] = flux
         fluxdict['flux_err'] = flux_err
-        m_0_col = self.config.band_names.index(self.config.prior_band)
+        m_0_col = self.config.bands.index(self.config.ref_band)
         fluxdict['mag0'] = mags[:, m_0_col]
         
         return fluxdict
@@ -554,6 +543,7 @@ class BPZ_lite(CatEstimator):
         # replace non-detects, traditional BPZ had nondet=99 and err = maglim
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
+        m_0_col = self.config.bands.index(self.config.ref_band)
 
         nz = len(self.zgrid)
         ng = test_data['flux'].shape[0]

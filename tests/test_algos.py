@@ -11,7 +11,7 @@ from rail.core.data import DataStore, TableHandle
 from rail.core.utils import RAILDIR
 from rail.core.algo_utils import one_algo
 from rail.estimation.algos import bpz_lite
-from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
+from rail.bpz.utils import RAIL_BPZ_DIR
 
 import scipy.special
 sci_ver_str = scipy.__version__.split('.')
@@ -62,7 +62,7 @@ def test_bpz_lite():
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'no_prior': False,
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'hdfn_gen',
                          'p_min': 0.005,
                          'gauss_kernel': 0.0,
@@ -93,8 +93,7 @@ def test_bpz_wHDFN_prior(inputdata, groupname):
                          'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
-                         'bands': 'ugrizy',
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'flat',
                          'p_min': 0.005,
                          'gauss_kernel': 0.1,
@@ -123,8 +122,7 @@ def test_bpz_lite_wkernel_flatprior():
                          'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                          'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
-                         'bands': 'ugrizy',
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'flat',
                          'p_min': 0.005,
                          'gauss_kernel': 0.1,
