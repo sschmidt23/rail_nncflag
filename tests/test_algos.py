@@ -11,7 +11,7 @@ from rail.core.data import DataStore, TableHandle
 from rail.core.utils import RAILDIR
 from rail.core.algo_utils import one_algo
 from rail.estimation.algos import bpz_lite
-from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
+from rail.bpz.utils import RAIL_BPZ_DIR
 
 import scipy.special
 sci_ver_str = scipy.__version__.split('.')
