@@ -69,7 +69,7 @@ class Inform_BPZ_lite(CatInformer):
     z0, km, and a for each type.  These parameters are then fed to the BPZ
     prior for use in the estimation stage.
     """
-    name = 'Inform_BPZ_lite'
+    name = "Inform_BPZ_lite"
     config_options = CatInformer.config_options.copy()
     config_options.update(zmin=Param(float, 0.0, msg="min z for grid"),
                           zmax=Param(float, 3.0, msg="max z for grid"),
@@ -83,10 +83,10 @@ class Inform_BPZ_lite(CatInformer):
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
-                                          "directory for rail + rail/examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                                          "directory for rail + rail/examples_data/estimation_data/data"),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
+                          spectra_file=Param(str, "SED/CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           m0=Param(float, 20.0, msg="reference apparent mag, used in prior param"),
                           nt_array=Param(list, [1, 2, 3], msg="list of integer number of templates per 'broad type', "
@@ -142,7 +142,7 @@ class Inform_BPZ_lite(CatInformer):
         fracparams = np.hstack([fo_init, kt_init])
         # run scipy optimize to find best params
         # note that best fit vals are stored as "x" for some reason
-        frac_results = sciop.minimize(self._frac_likelihood, fracparams, method='nelder-mead').x
+        frac_results = sciop.minimize(self._frac_likelihood, fracparams, method="nelder-mead").x
         if self.ntyp == 1:
             self.fo_arr = np.array([frac_results[0]])
             self.kt_arr = np.array([frac_results[1]])
@@ -179,7 +179,7 @@ class Inform_BPZ_lite(CatInformer):
             print(f"minimizing for type {i}")
             self.typmask = (self.besttypes == i)
             dndzparams = np.hstack([self.config.init_zo, self.config.init_alpha, self.config.init_km])
-            result = sciop.minimize(self._dndz_likelihood, dndzparams, method='nelder-mead').x
+            result = sciop.minimize(self._dndz_likelihood, dndzparams, method="nelder-mead").x
             zo_arr[i] = result[0]
             a_arr[i] = result[1]
             km_arr[i] = result[2]
@@ -191,7 +191,7 @@ class Inform_BPZ_lite(CatInformer):
         if typefile == "":  # pragma: no cover
             typedata = np.zeros(ngal, dtype=int)
         else:
-            typedata = tables_io.read(typefile)['types']  # pragma: no cover
+            typedata = tables_io.read(typefile)["types"]  # pragma: no cover
         numtypes = len(list(set(typedata)))
         return numtypes, typedata
 
@@ -200,9 +200,9 @@ class Inform_BPZ_lite(CatInformer):
         """
         self.m0 = self.config.m0
         if self.config.hdf5_groupname:
-            training_data = self.get_data('input')[self.config.hdf5_groupname]
+            training_data = self.get_data("input")[self.config.hdf5_groupname]
         else:  # pragma: no cover
-            training_data = self.get_data('input')
+            training_data = self.get_data("input")
 
         ngal = len(training_data[self.config.prior_band])
 
@@ -238,7 +238,7 @@ class Inform_BPZ_lite(CatInformer):
         self.model = dict(fo_arr=self.fo_arr, kt_arr=self.kt_arr, zo_arr=zo_arr,
                           km_arr=km_arr, a_arr=a_arr, mo=self.config.m0,
                           nt_array=self.config.nt_array)
-        self.add_data('model', self.model)
+        self.add_data("model", self.model)
 
 
 class BPZ_lite(CatEstimator):
@@ -268,17 +268,17 @@ class BPZ_lite(CatEstimator):
                                           msg="data_path (str): file path to the "
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
-                                          "directory for rail + ../examples/estimation/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, 'rail/examples/estimation/configs/test_bpz.columns'),
+                                          "directory for rail + ../examples_data/estimation_data/data"),
+                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
                                              msg="name of the file specifying the columns"),
-                          spectra_file=Param(str, 'SED/CWWSB4.list',
+                          spectra_file=Param(str, "SED/CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
-                          madau_flag=Param(str, 'no',
+                          madau_flag=Param(str, "no",
                                            msg="set to 'yes' or 'no' to set whether to include intergalactic "
                                                "Madau reddening when constructing model fluxes"),
                           mag_limits=Param(dict, def_maglims, msg="1 sigma mag limits"),
                           no_prior=Param(bool, "False", msg="set to True if you want to run with no prior"),
-                          prior_band=Param(str, 'mag_i_lsst',
+                          prior_band=Param(str, "mag_i_lsst",
                                            msg="specifies which band the magnitude/type prior is trained in, e.g. 'i'"),
                           p_min=Param(float, 0.005,
                                       msg="BPZ sets all values of "
@@ -299,14 +299,14 @@ class BPZ_lite(CatEstimator):
         """
         CatEstimator.__init__(self, args, comm=comm)
 
-        datapath = self.config['data_path']
+        datapath = self.config["data_path"]
         if datapath is None or datapath == "None":
-            tmpdatapath = os.path.join(RAILDIR, "rail/examples/estimation/data")
+            tmpdatapath = os.path.join(RAILDIR, "rail/examples_data/estimation_data/data")
             os.environ["BPZDATAPATH"] = tmpdatapath
             self.data_path = tmpdatapath
         else:  # pragma: no cover
             self.data_path = datapath
-            os.environ['BPZDATAPATH'] = self.data_path
+            os.environ["BPZDATAPATH"] = self.data_path
         if not os.path.exists(self.data_path):  # pragma: no cover
             raise FileNotFoundError("BPZDATAPATH " + self.data_path + " does not exist! Check value of data_path in config file!")
 
@@ -353,7 +353,7 @@ class BPZ_lite(CatEstimator):
 
         data_path = self.data_path
         columns_file = self.config.columns_file
-        ignore_rows = ['M_0', 'OTHER', 'ID', 'Z_S']
+        ignore_rows = ["M_0", "OTHER", "ID", "Z_S"]
         filters = [f for f in get_str(columns_file, 0) if f not in ignore_rows]
 
         spectra_file = os.path.join(data_path, self.config.spectra_file)
