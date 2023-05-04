@@ -30,7 +30,7 @@ import tables_io
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.core.utils import RAILDIR
-from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
+from rail.bpz.utils import RAIL_BPZ_DIR
 from rail.core.common_params import SHARED_PARAMS
 
 
