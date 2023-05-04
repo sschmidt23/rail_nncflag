@@ -474,7 +474,7 @@ class BPZ_lite(CatEstimator):
         # Upate the flux dictionary with new things we have calculated
         fluxdict['flux'] = flux
         fluxdict['flux_err'] = flux_err
-        m_0_col = self.config.band_names.index(self.config.prior_band)
+        m_0_col = self.config.bands.index(self.config.ref_band)
         fluxdict['mag0'] = mags[:, m_0_col]
         
         return fluxdict
