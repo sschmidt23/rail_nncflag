@@ -11,14 +11,15 @@ from rail.core.data import DataStore, TableHandle
 from rail.core.utils import RAILDIR
 from rail.core.algo_utils import one_algo
 from rail.estimation.algos import bpz_lite
-from rail.estimation.algos.bpz_version.utils import RAIL_BPZ_DIR
+from rail.bpz.utils import RAIL_BPZ_DIR
 
 import scipy.special
 sci_ver_str = scipy.__version__.split('.')
 
+parquetdata = "./tests/validation_10gal.pq"
+traindata = os.path.join(RAILDIR, 'rail/examples_data/testdata/training_100gal.hdf5')
+validdata = os.path.join(RAILDIR, 'rail/examples_data/testdata/validation_10gal.hdf5')
 
-traindata = os.path.join(RAILDIR, 'rail/examples/testdata/training_100gal.hdf5')
-validdata = os.path.join(RAILDIR, 'rail/examples/testdata/validation_10gal.hdf5')
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
 
@@ -57,11 +58,11 @@ def test_bpz_lite():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
-                         'spectra_file': "CWWSB4.list",
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
+                         'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
                          'no_prior': False,
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'hdfn_gen',
                          'p_min': 0.005,
                          'gauss_kernel': 0.0,
@@ -77,29 +78,34 @@ def test_bpz_lite():
     assert np.isclose(results.ancil['zmode'], zb_expected).all()
     assert np.isclose(results.ancil['zmode'], rerun_results.ancil['zmode']).all()
 
-
-def test_bpz_wHDFN_prior():
+@pytest.mark.parametrize(
+    "inputdata, groupname",
+    [
+        (parquetdata, ""),
+        (validdata, "photometry")
+        ]
+)
+def test_bpz_wHDFN_prior(inputdata, groupname):
     estim_config_dict = {'zmin': 0.0, 'zmax': 3.0,
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
-                         'spectra_file': "CWWSB4.list",
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
+                         'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
-                         'bands': 'ugrizy',
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'flat',
                          'p_min': 0.005,
                          'gauss_kernel': 0.1,
                          'zp_errors': np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01]),
                          'mag_err_min': 0.005,
-                         'hdf5_groupname': 'photometry',
+                         'hdf5_groupname': groupname,
                          'nt_array': [1, 2, 5],
-                         'model': './examples/estimation/CWW_HDFN_prior.pkl'}
+                         'model': os.path.join(RAILDIR, 'rail/examples_data/estimation_data/data/CWW_HDFN_prior.pkl')}
     zb_expected = np.array([0.18, 2.88, 0.12, 0.15, 2.97, 2.78, 0.11, 0.19,
                             2.98, 2.92])
 
-    validation_data = DS.read_file('validation_data', TableHandle, validdata)
+    validation_data = DS.read_file('validation_data', TableHandle, inputdata)
     pz = bpz_lite.BPZ_lite.make_stage(name='bpz_hdfn', **estim_config_dict)
     results = pz.estimate(validation_data)
     assert np.isclose(results.data.ancil['zmode'], zb_expected).all()
@@ -113,11 +119,10 @@ def test_bpz_lite_wkernel_flatprior():
                          'dz': 0.01,
                          'nzbins': 301,
                          'data_path': None,
-                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples/estimation/configs/test_bpz.columns"),
-                         'spectra_file': "CWWSB4.list",
+                         'columns_file': os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
+                         'spectra_file': "SED/CWWSB4.list",
                          'madau_flag': 'no',
-                         'bands': 'ugrizy',
-                         'prior_band': 'mag_i_lsst',
+                         'ref_band': 'mag_i_lsst',
                          'prior_file': 'flat',
                          'p_min': 0.005,
                          'gauss_kernel': 0.1,
