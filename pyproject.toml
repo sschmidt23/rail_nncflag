@@ -21,9 +21,8 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "desc-bpz",
-    "pandas",
-    "pz-rail",
-    "tables-io[full]",
+    "pz-rail-base",
+    "qp-prob[full]",
 ]
 
 [project.optional-dependencies]
@@ -32,6 +31,7 @@ dev = [
     "pylint",
     "pytest",
     "pytest-cov",
+    "pre-commit", # Used to run checks before finalizing a git commit
     "yamllint",
 ]
 
