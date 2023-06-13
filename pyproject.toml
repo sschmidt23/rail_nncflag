@@ -21,7 +21,7 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "desc-bpz",
-    "pz-rail@git+https://github.com/LSSTDESC/RAIL.git@eac/minimal#egg=pz-rail",
+    "pz-rail-base",
     "qp-prob[full]",
 ]
 
