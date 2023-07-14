@@ -39,7 +39,7 @@ def test_bpz_train(ntarray):
         broad_types = np.zeros(100, dtype=int)
     typedict = dict(types=broad_types)
     tables_io.write(typedict, "tmp_broad_types.hdf5")
-    train_algo = bpz_lite.Inform_BPZ_lite
+    train_algo = bpz_lite.BPZliteInformer
     DS.clear()
     training_data = DS.read_file('training_data', TableHandle, traindata)
     train_stage = train_algo.make_stage(**train_config_dict)
@@ -73,7 +73,7 @@ def test_bpz_lite():
                          'model': 'testmodel_bpz.pkl'}
     zb_expected = np.array([0.16, 0.12, 0.14, 0.14, 0.06, 0.14, 0.12, 0.14, 0.06, 0.16])
     train_algo = None
-    pz_algo = bpz_lite.BPZ_lite
+    pz_algo = bpz_lite.BPZliteEstimator
     results, rerun_results, rerun3_results = one_algo("BPZ_lite", train_algo, pz_algo, train_config_dict, estim_config_dict)
     assert np.isclose(results.ancil['zmode'], zb_expected).all()
     assert np.isclose(results.ancil['zmode'], rerun_results.ancil['zmode']).all()
@@ -106,7 +106,7 @@ def test_bpz_wHDFN_prior(inputdata, groupname):
                             2.98, 2.92])
 
     validation_data = DS.read_file('validation_data', TableHandle, inputdata)
-    pz = bpz_lite.BPZ_lite.make_stage(name='bpz_hdfn', **estim_config_dict)
+    pz = bpz_lite.BPZliteEstimator.make_stage(name='bpz_hdfn', **estim_config_dict)
     results = pz.estimate(validation_data)
     assert np.isclose(results.data.ancil['zmode'], zb_expected).all()
     DS.clear()
@@ -132,7 +132,7 @@ def test_bpz_lite_wkernel_flatprior():
     # zb_expected = np.array([0.18, 2.88, 0.12, 0.15, 2.97, 2.78, 0.11, 0.19,
     #                         2.98, 2.92])
     train_algo = None
-    pz_algo = bpz_lite.BPZ_lite
+    pz_algo = bpz_lite.BPZliteEstimator
     results, rerun_results, rerun3_results = one_algo("BPZ_lite", train_algo, pz_algo, train_config_dict, estim_config_dict)
     # assert np.isclose(results.ancil['zmode'], zb_expected).all()
     assert np.isclose(results.ancil['zmode'], rerun_results.ancil['zmode']).all()

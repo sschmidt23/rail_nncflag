@@ -40,8 +40,8 @@ def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
     return np.power(z, alpha) * np.exp(-1. * np.power((z / zm), alpha))
 
 
-class Inform_BPZ_lite(CatInformer):
-    """Inform stage for BPZ_lite, this stage *assumes* that you have a set of
+class BPZliteInformer(CatInformer):
+    """Inform stage for BPZliteEstimator, this stage *assumes* that you have a set of
     SED templates and that the training data has already been assigned a
     'best fit broad type' (that is, something like ellliptical, spiral,
     irregular, or starburst, similar to how the six SEDs in the CWW/SB set
@@ -61,7 +61,7 @@ class Inform_BPZ_lite(CatInformer):
     z0, km, and a for each type.  These parameters are then fed to the BPZ
     prior for use in the estimation stage.
     """
-    name = "Inform_BPZ_lite"
+    name = "BPZliteInformer"
     config_options = CatInformer.config_options.copy()
     config_options.update(zmin=SHARED_PARAMS,
                           zmax=SHARED_PARAMS,
@@ -232,7 +232,7 @@ class Inform_BPZ_lite(CatInformer):
         self.add_data("model", self.model)
 
 
-class BPZ_lite(CatEstimator):
+class BPZliteEstimator(CatEstimator):
     """CatEstimator subclass to implement basic marginalized PDF for BPZ
     In addition to the marginalized redshift PDF, we also compute several
     ancillary quantities that will be stored in the ensemble ancil data:
@@ -243,7 +243,7 @@ class BPZ_lite(CatEstimator):
     so lower numbers mean other templates could be better fits, likely
     at other redshifts
     """
-    name = "BPZ_lite"
+    name = "BPZliteEstimator"
     config_options = CatEstimator.config_options.copy()
     config_options.update(zmin=SHARED_PARAMS,
                           zmax=SHARED_PARAMS,
