@@ -1,5 +1,6 @@
 [project]
 name = "pz-rail-bpz"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 readme = "README.md"
 authors = [
@@ -44,8 +45,8 @@ write_to = "src/rail/bpz/_version.py"
 [tool.setuptools.package-data]
 "rail.examples.estimation.configs" = ["*.columns"]
 
-[tools.setuptools.packages.find]
-where = ["."]
+[tool.setuptools.packages.find]
+where = ["src"]
 include = ["rail"]
 namespaces = true
 
