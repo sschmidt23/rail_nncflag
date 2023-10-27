@@ -1,5 +1,6 @@
 [project]
 name = "pz-rail-bpz"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 readme = "README.md"
 authors = [
@@ -43,11 +44,6 @@ write_to = "src/rail/bpz/_version.py"
 
 [tool.setuptools.package-data]
 "rail.examples.estimation.configs" = ["*.columns"]
-
-[tools.setuptools.packages.find]
-where = ["."]
-include = ["rail"]
-namespaces = true
 
 [tool.pytest.ini_options]
 testpaths = [
