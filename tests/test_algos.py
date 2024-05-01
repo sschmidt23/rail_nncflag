@@ -9,7 +9,7 @@ import tables_io
 from rail.core.stage import RailStage
 from rail.core.data import DataStore, TableHandle
 from rail.core.common_params import RAILDIR
-from rail.core.algo_utils import one_algo
+from rail.utils.algo_utils import one_algo
 from rail.estimation.algos import bpz_lite
 from rail.bpz.utils import RAIL_BPZ_DIR
 
