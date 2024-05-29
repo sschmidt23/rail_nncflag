@@ -138,7 +138,13 @@ class BPZliteInformer(CatInformer):
             self.fo_arr = np.array([frac_results[0]])
             self.kt_arr = np.array([frac_results[1]])
         else:
-            self.fo_arr = frac_results[:self.ntyp - 1]
+            tmpfo = frac_results[:self.ntyp - 1]
+            # minimizer can sometimes give fractions greater than one, if so normalize
+            fracnorm = np.sum(tmpfo)
+            if fracnorm > 1.:
+                print("bad norm for f0, normalizing")
+                tmpfo /= fracnorm
+            self.fo_arr = tmpfo
             self.kt_arr = frac_results[self.ntyp - 1:]
 
     def _dndz_likelihood(self, params):
