@@ -141,7 +141,7 @@ class BPZliteInformer(CatInformer):
             tmpfo = frac_results[:self.ntyp - 1]
             # minimizer can sometimes give fractions greater than one, if so normalize
             fracnorm = np.sum(tmpfo)
-            if fracnorm > 1.:
+            if fracnorm > 1.:  # pragma: no cover
                 print("bad norm for f0, normalizing")
                 tmpfo /= fracnorm
             self.fo_arr = tmpfo
