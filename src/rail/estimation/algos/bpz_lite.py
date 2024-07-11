@@ -96,7 +96,7 @@ class BPZliteInformer(CatInformer):
     def __init__(self, args, **kwargs):
         """Init function, init config stuff
         """
-        super().__init__(self, args, **kwargs)
+        super().__init__(args, **kwargs)
         self.fo_arr = None
         self.kt_arr = None
         self.typmask = None
@@ -292,7 +292,7 @@ class BPZliteEstimator(CatEstimator):
     def __init__(self, args, **kwargs):
         """Constructor, build the CatEstimator, then do BPZ specific setup
         """
-        super().__init__(self, args, **kwargs)
+        super().__init__(args, **kwargs)
 
         datapath = self.config["data_path"]
         if datapath is None or datapath == "None":
