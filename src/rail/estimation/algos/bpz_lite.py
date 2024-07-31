@@ -92,10 +92,10 @@ class BPZliteInformer(CatInformer):
                           init_km=Param(float, 0.1, msg="initial guess for km in training"),
                           type_file=Param(str, "", msg="name of file with the broad type fits for the training data"))
 
-    def __init__(self, args, comm=None):
+    def __init__(self, args, **kwargs):
         """Init function, init config stuff
         """
-        CatInformer.__init__(self, args, comm=comm)
+        super().__init__(args, **kwargs)
         self.fo_arr = None
         self.kt_arr = None
         self.typmask = None
@@ -288,10 +288,10 @@ class BPZliteEstimator(CatEstimator):
                                             msg="a minimum floor for the magnitude errors to prevent a "
                                             "large chi^2 for very very bright objects"))
 
-    def __init__(self, args, comm=None):
+    def __init__(self, args, **kwargs):
         """Constructor, build the CatEstimator, then do BPZ specific setup
         """
-        CatEstimator.__init__(self, args, comm=comm)
+        super().__init__(args, **kwargs)
 
         datapath = self.config["data_path"]
         if datapath is None or datapath == "None":
