@@ -30,8 +30,11 @@ import tables_io
 from ceci.config import StageParameter as Param
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.utils.path_utils import RAILDIR
-from rail.bpz.utils import RAIL_BPZ_DIR
 from rail.core.common_params import SHARED_PARAMS
+
+
+default_filter_list = ["DC2LSST_u", "DC2LSST_g", "DC2LSST_r",
+                       "DC2LSST_i", "DC2LSST_z", "DC2LSST_y"]
 
 
 def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
@@ -76,8 +79,6 @@ class BPZliteInformer(CatInformer):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + rail/examples_data/estimation_data/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
-                                             msg="name of the file specifying the columns"),
                           spectra_file=Param(str, "CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           m0=Param(float, 20.0, msg="reference apparent mag, used in prior param"),
@@ -266,8 +267,9 @@ class BPZliteEstimator(CatEstimator):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + ../examples_data/estimation_data/data"),
-                          columns_file=Param(str, os.path.join(RAIL_BPZ_DIR, "rail/examples_data/estimation_data/configs/test_bpz.columns"),
-                                             msg="name of the file specifying the columns"),
+                          filter_list=Param(list, default_filter_list,
+                                            msg="list of filter files names (with no '.sed' suffix). Filters must be"
+                                            "in FILTER dir.  MUST BE IN SAME ORDER as 'bands'"),
                           spectra_file=Param(str, "CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           madau_flag=Param(str, "no",
@@ -309,6 +311,8 @@ class BPZliteEstimator(CatEstimator):
             raise ValueError("Number of bands specified in bands must be equal to number of mag errors specified in err_bands!")
         if self.config.ref_band not in self.config.bands:  # pragma: no cover
             raise ValueError(f"reference band not found in bands specified in bands: {str(self.config.bands)}")
+        if len(self.config.bands) != len(self.config.err_bands) or len(self.config.bands) != len(self.config.filter_list):
+            raise ValueError(f"length of bands, err_bands, and filter_list are not the same!")
 
     def _initialize_run(self):
         super()._initialize_run()
@@ -346,9 +350,7 @@ class BPZliteEstimator(CatEstimator):
         z = self.zgrid
 
         data_path = self.data_path
-        columns_file = self.config.columns_file
-        ignore_rows = ["M_0", "OTHER", "ID", "Z_S"]
-        filters = [f for f in get_str(columns_file, 0) if f not in ignore_rows]
+        filters = self.config.filter_list
 
         spectra_file = os.path.join(data_path, "SED", self.config.spectra_file)
         spectra = [s[:-4] for s in get_str(spectra_file)]
