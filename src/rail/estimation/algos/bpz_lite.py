@@ -311,6 +311,8 @@ class BPZliteEstimator(CatEstimator):
             raise ValueError("Number of bands specified in bands must be equal to number of mag errors specified in err_bands!")
         if self.config.ref_band not in self.config.bands:  # pragma: no cover
             raise ValueError(f"reference band not found in bands specified in bands: {str(self.config.bands)}")
+        if len(self.config.bands) != len(self.config.err_bands) or len(self.config.bands) != len(self.config.filter_list):
+            raise ValueError(f"length of bands, err_bands, and filter_list are not the same!")
 
     def _initialize_run(self):
         super()._initialize_run()
