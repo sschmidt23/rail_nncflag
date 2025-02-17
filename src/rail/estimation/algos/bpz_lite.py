@@ -57,8 +57,12 @@ class BPZliteInformer(CatInformer):
     p(T|m) = exp(-kt(m-m0))
     where m0 is a constant and we fit for values of kt
     For p(z|T,m) we have
+
+    ```
     P(z|T,m) = f_x*z0_x^a *exp(-(z/zm_x)^a)
     where zm_x = z0_x*(km_x-m0)
+    ```
+
     where f_x is the type fraction from p(T|m), and we fit for values of
     z0, km, and a for each type.  These parameters are then fed to the BPZ
     prior for use in the estimation stage.
