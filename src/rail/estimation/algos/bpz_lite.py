@@ -271,9 +271,7 @@ class BPZliteEstimator(CatEstimator):
                                           "SED, FILTER, and AB directories.  If left to "
                                           "default `None` it will use the install "
                                           "directory for rail + ../examples_data/estimation_data/data"),
-                          filter_list=Param(list, default_filter_list,
-                                            msg="list of filter files names (with no '.sed' suffix). Filters must be"
-                                            "in FILTER dir.  MUST BE IN SAME ORDER as 'bands'"),
+                          filter_list=SHARED_PARAMS,
                           spectra_file=Param(str, "CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           madau_flag=Param(str, "no",
@@ -288,8 +286,7 @@ class BPZliteEstimator(CatEstimator):
                                              msg="gauss_kernel (float): BPZ "
                                              "convolves the PDF with a kernel if this is set "
                                              "to a non-zero number"),
-                          zp_errors=Param(list, [0.01, 0.01, 0.01, 0.01, 0.01, 0.01],
-                                          msg="BPZ adds these values in quadrature to the photometric errors"),
+                          zp_errors=SHARED_PARAMS,
                           mag_err_min=Param(float, 0.005,
                                             msg="a minimum floor for the magnitude errors to prevent a "
                                             "large chi^2 for very very bright objects"))
@@ -316,7 +313,11 @@ class BPZliteEstimator(CatEstimator):
         if self.config.ref_band not in self.config.bands:  # pragma: no cover
             raise ValueError(f"reference band not found in bands specified in bands: {str(self.config.bands)}")
         if len(self.config.bands) != len(self.config.err_bands) or len(self.config.bands) != len(self.config.filter_list):
-            raise ValueError(f"length of bands, err_bands, and filter_list are not the same!")
+            raise ValueError(
+                f"length of bands {len(self.config.bands)}), "
+                f"err_bands, {len(self.config.err_bands)} and "
+                f"filter_list {len(self.config.filter_list)} are not the same!"
+            )
 
     def _initialize_run(self):
         super()._initialize_run()
