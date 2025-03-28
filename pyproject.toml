@@ -18,7 +18,7 @@ dynamic = ["version"]
 
 dependencies = [
     "desc-bpz",
-    "pz-rail-base>=1.0.3",
+    "pz-rail-base>=1.1.4",
     "qp-prob[full]",
 ]
 
