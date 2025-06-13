@@ -33,10 +33,6 @@ from rail.utils.path_utils import RAILDIR
 from rail.core.common_params import SHARED_PARAMS
 
 
-default_filter_list = ["DC2LSST_u", "DC2LSST_g", "DC2LSST_r",
-                       "DC2LSST_i", "DC2LSST_z", "DC2LSST_y"]
-
-
 def nzfunc(z, z0, alpha, km, m, m0):  # pragma: no cover
     zm = z0 + (km * (m - m0))
     return np.power(z, alpha) * np.exp(-1. * np.power((z / zm), alpha))
@@ -95,7 +91,8 @@ class BPZliteInformer(CatInformer):
                           init_zo=Param(float, 0.4, msg="initial guess for z0 in training"),
                           init_alpha=Param(float, 1.8, msg="initial guess for alpha in training"),
                           init_km=Param(float, 0.1, msg="initial guess for km in training"),
-                          type_file=Param(str, "", msg="name of file with the broad type fits for the training data"))
+                          type_file=Param(str, "", msg="name of file with the broad type fits for the training data"),
+                          output_hdfn=Param(bool, True, msg="if True, just return the default HDFN prior params rather than fitting"))
 
     def __init__(self, args, **kwargs):
         """Init function, init config stuff
@@ -199,45 +196,55 @@ class BPZliteInformer(CatInformer):
     def run(self):
         """compute the best fit prior parameters
         """
-        self.m0 = self.config.m0
-        if self.config.hdf5_groupname:
-            training_data = self.get_data("input")[self.config.hdf5_groupname]
-        else:  # pragma: no cover
-            training_data = self.get_data("input")
+        if self.config.output_hdfn:
+            # the parameters for the HDFN prior
+            self.fo_arr = np.array([0.35, 0.5])
+            self.kt_arr = np.array([0.45, 0.147])
+            self.zo_arr = np.array([0.431, 0.39, 0.0626])
+            self.km_arr = np.array([0.0913, 0.0636, 0.123])
+            self.a_arr = np.array([2.465, 1.806, 0.906])
+            self.m0 = 20.0
+            self.nt_array = self.config.nt_array
+        else:
+            self.m0 = self.config.m0
+            if self.config.hdf5_groupname:
+                training_data = self.get_data("input")[self.config.hdf5_groupname]
+            else:  # pragma: no cover
+                training_data = self.get_data("input")
 
-        ngal = len(training_data[self.config.ref_band])
+            ngal = len(training_data[self.config.ref_band])
 
-        if self.config.ref_band not in training_data.keys():  # pragma: no cover
-            raise KeyError(f"ref_band {self.config.ref_band} not found in input data!")
-        if self.config.redshift_col not in training_data.keys():  # pragma: no cover
-            raise KeyError(f"redshift column {self.config.redshift_col} not found in input data!")
+            if self.config.ref_band not in training_data.keys():  # pragma: no cover
+                raise KeyError(f"ref_band {self.config.ref_band} not found in input data!")
+            if self.config.redshift_col not in training_data.keys():  # pragma: no cover
+                raise KeyError(f"redshift column {self.config.redshift_col} not found in input data!")
 
-        # cal function to get broad types
-        Ntyp, broad_types = self._get_broad_type(ngal)
-        self.ntyp = Ntyp
-        # trim data to between mmin and mmax
-        ref_mags = training_data[self.config.ref_band]
-        mask = ((ref_mags >= self.config.mmin) & (ref_mags <= self.config.mmax))
-        self.mags = ref_mags[mask]
-        # To not screw up likelihood calculation, set objs with mag
-        # brighter than m0 to value of m0
-        brightmask = (self.mags < self.m0)
-        self.mags[brightmask] = self.m0
-        self.szs = training_data[self.config.redshift_col][mask]
-        self.besttypes = broad_types[mask]
+            # cal function to get broad types
+            Ntyp, broad_types = self._get_broad_type(ngal)
+            self.ntyp = Ntyp
+            # trim data to between mmin and mmax
+            ref_mags = training_data[self.config.ref_band]
+            mask = ((ref_mags >= self.config.mmin) & (ref_mags <= self.config.mmax))
+            self.mags = ref_mags[mask]
+            # To not screw up likelihood calculation, set objs with mag
+            # brighter than m0 to value of m0
+            brightmask = (self.mags < self.m0)
+            self.mags[brightmask] = self.m0
+            self.szs = training_data[self.config.redshift_col][mask]
+            self.besttypes = broad_types[mask]
 
-        numused = len(self.besttypes)
-        print(f"using {numused} galaxies in calculation")
+            numused = len(self.besttypes)
+            print(f"using {numused} galaxies in calculation")
 
-        self._find_fractions()
-        print("best values for fo and kt:")
-        print(self.fo_arr)
-        print(self.kt_arr)
-        zo_arr, km_arr, a_arr = self._find_dndz_params()
-        a_arr = np.abs(a_arr)
+            self._find_fractions()
+            print("best values for fo and kt:")
+            print(self.fo_arr)
+            print(self.kt_arr)
+            self.zo_arr, self.km_arr, self.a_arr = self._find_dndz_params()
+            self.a_arr = np.abs(self.a_arr)
 
-        self.model = dict(fo_arr=self.fo_arr, kt_arr=self.kt_arr, zo_arr=zo_arr,
-                          km_arr=km_arr, a_arr=a_arr, mo=self.config.m0,
+        self.model = dict(fo_arr=self.fo_arr, kt_arr=self.kt_arr, zo_arr=self.zo_arr,
+                          km_arr=self.km_arr, a_arr=self.a_arr, mo=self.m0,
                           nt_array=self.config.nt_array)
         self.add_data("model", self.model)
 
