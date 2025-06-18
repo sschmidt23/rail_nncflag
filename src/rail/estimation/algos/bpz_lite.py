@@ -82,7 +82,7 @@ class BPZliteInformer(CatInformer):
                           spectra_file=Param(str, "CWWSB4.list",
                                              msg="name of the file specifying the list of SEDs to use"),
                           m0=Param(float, 20.0, msg="reference apparent mag, used in prior param"),
-                          nt_array=Param(list, [1, 2, 3], msg="list of integer number of templates per 'broad type', "
+                          nt_array=Param(list, [1, 2, 5], msg="list of integer number of templates per 'broad type', "
                                          "must be in same order as the template set, and must sum to the same number "
                                          "as the # of templates in the spectra file"),
                           mmin=Param(float, 18.0, msg="lowest apparent mag in ref band, lower values ignored"),
