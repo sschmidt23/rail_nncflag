@@ -594,4 +594,4 @@ class BPZliteEstimator(CatEstimator):
             zmean[i] = (zgrid * pdfs[i]).sum() / pdfs[i].sum()
         qp_dstn = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=pdfs))
         qp_dstn.set_ancil(dict(zmode=zmode, zmean=zmean, tb=tb, todds=todds))
-        self._do_chunk_output(qp_dstn, start, end, first)
+        self._do_chunk_output(qp_dstn, start, end, first, data=data)
