@@ -555,7 +555,8 @@ class BPZliteEstimator(CatEstimator):
         # replace non-detects, traditional BPZ had nondet=99 and err = maglim
         
         # convert data format to numpy dictionary
-        data = self._convert_table_table_format(data, out_fmt_str="numpyDict")
+        if tables_io.types.table_type(data) != 1:
+            data = self._convert_table_table_format(data, "numpyDict")
         
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
