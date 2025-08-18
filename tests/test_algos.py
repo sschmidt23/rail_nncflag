@@ -14,6 +14,7 @@ import scipy.special
 sci_ver_str = scipy.__version__.split('.')
 
 parquetdata = "./tests/validation_10gal.pq"
+fitsdata = "./tests/validation_10gal.fits"
 traindata = os.path.join(RAILDIR, 'rail/examples_data/testdata/training_100gal.hdf5')
 validdata = os.path.join(RAILDIR, 'rail/examples_data/testdata/validation_10gal.hdf5')
 
@@ -96,7 +97,8 @@ def test_bpz_lite():
     "inputdata, groupname",
     [
         (parquetdata, ""),
-        (validdata, "photometry")
+        (validdata, "photometry"),
+        (fitsdata, ""),
     ]
 )
 def test_bpz_wHDFN_prior(inputdata, groupname):
