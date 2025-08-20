@@ -30,7 +30,7 @@ DS.__class__.allow_overwrite = True
      ([8], fitsdata, "",10),
     ]
 )
-def test_bpz_train(ntarray,inputdata, groupname):
+def test_bpz_train(ntarray,inputdata, groupname,size):
     # first, train with two broad types
     train_config_dict = {'zmin': 0.0, 'zmax': 3.0, 'dz': 0.01, 'hdf5_groupname': groupname,
                          'nt_array': ntarray, 'type_file': 'tmp_broad_types.hdf5',
