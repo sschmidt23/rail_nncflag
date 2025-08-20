@@ -23,11 +23,11 @@ DS.__class__.allow_overwrite = True
 
 
 @pytest.mark.parametrize(
-    "ntarray, inputdata, groupname",
+    "ntarray, inputdata, groupname, size",
     [
-     ([8], parquetdata, ""),
-     ([4, 4], validdata, "photometry"),
-     ([8], fitsdata, ""),
+     ([8], parquetdata, "", 10),
+     ([4, 4], traindata, "photometry", 100),
+     ([8], fitsdata, "",10),
     ]
 )
 def test_bpz_train(ntarray,inputdata, groupname):
@@ -36,9 +36,9 @@ def test_bpz_train(ntarray,inputdata, groupname):
                          'nt_array': ntarray, 'type_file': 'tmp_broad_types.hdf5',
                          'model': 'testmodel_bpz.pkl', 'output_hdfn': False}
     if len(ntarray) == 2:
-        broad_types = np.random.randint(2, size=100)
+        broad_types = np.random.randint(2, size=size)
     else:
-        broad_types = np.zeros(100, dtype=int)
+        broad_types = np.zeros(size, dtype=int)
     typedict = dict(types=broad_types)
     tables_io.write(typedict, "tmp_broad_types.hdf5")
     train_algo = bpz_lite.BPZliteInformer
