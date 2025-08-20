@@ -23,12 +23,16 @@ DS.__class__.allow_overwrite = True
 
 
 @pytest.mark.parametrize(
-    "ntarray",
-    [[8], [4, 4]]
+    "ntarray, inputdata, groupname",
+    [
+     ([8], parquetdata, ""),
+     ([4, 4], validdata, "photometry"),
+     ([8], fitsdata, ""),
+    ]
 )
-def test_bpz_train(ntarray):
+def test_bpz_train(ntarray,inputdata, groupname):
     # first, train with two broad types
-    train_config_dict = {'zmin': 0.0, 'zmax': 3.0, 'dz': 0.01, 'hdf5_groupname': 'photometry',
+    train_config_dict = {'zmin': 0.0, 'zmax': 3.0, 'dz': 0.01, 'hdf5_groupname': groupname,
                          'nt_array': ntarray, 'type_file': 'tmp_broad_types.hdf5',
                          'model': 'testmodel_bpz.pkl', 'output_hdfn': False}
     if len(ntarray) == 2:
@@ -39,7 +43,7 @@ def test_bpz_train(ntarray):
     tables_io.write(typedict, "tmp_broad_types.hdf5")
     train_algo = bpz_lite.BPZliteInformer
     DS.clear()
-    training_data = DS.read_file('training_data', TableHandle, traindata)
+    training_data = DS.read_file('training_data', TableHandle, inputdata)
     train_stage = train_algo.make_stage(**train_config_dict)
     train_stage.inform(training_data)
     expected_keys = ['fo_arr', 'kt_arr', 'zo_arr', 'km_arr', 'a_arr', 'mo', 'nt_array']
@@ -52,12 +56,12 @@ def test_bpz_train(ntarray):
 
 
 def test_output_hdfn_inform():
-    train_config_dict = {'zmin': 0.0, 'zmax': 3.0, 'dz': 0.01, 'hdf5_groupname': "",
+    train_config_dict = {'zmin': 0.0, 'zmax': 3.0, 'dz': 0.01, 'hdf5_groupname': "photometry",
                          'nt_array': [1, 2, 5], 'type_file': 'tmp_broad_types.hdf5',
                          'model': 'testmodel_bpz.pkl', 'output_hdfn': True}
     train_algo = bpz_lite.BPZliteInformer
     DS.clear()
-    training_data = DS.read_file('training_data', TableHandle, parquetdata)
+    training_data = DS.read_file('training_data', TableHandle, traindata)
     train_stage = train_algo.make_stage(**train_config_dict)
     train_stage.inform(training_data)
     expected_keys = ['fo_arr', 'kt_arr', 'zo_arr', 'km_arr', 'a_arr', 'mo', 'nt_array']
