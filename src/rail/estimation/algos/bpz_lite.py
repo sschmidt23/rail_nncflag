@@ -213,7 +213,7 @@ class BPZliteInformer(CatInformer):
 
             # convert training data format to numpy dictionary
             if tables_io.types.table_type(training_data) != 1:
-                training_data = self._convert_table_table_format(training_data, out_fmt_str="numpyDict")
+                training_data = self._convert_table_format(training_data, out_fmt_str="numpyDict")
 
             ngal = len(training_data[self.config.ref_band])
 
