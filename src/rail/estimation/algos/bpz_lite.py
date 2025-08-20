@@ -557,7 +557,7 @@ class BPZliteEstimator(CatEstimator):
         
         # convert data format to numpy dictionary
         if tables_io.types.table_type(data) != 1:
-            data = self._convert_table_table_format(data, "numpyDict")
+            data = self._convert_table_format(data, "numpyDict")
         
         # put in that format here
         test_data = self._preprocess_magnitudes(data)
