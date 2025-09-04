@@ -13,10 +13,11 @@ flag valued between 0 (likely bad redshift) and 1
 import os
 import numpy as np
 import glob
+import pandas as pd
 import qp
 import tables_io
 from ceci.config import StageParameter as Param
-from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle
+from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, PqHandle, Hdf5Handle
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.utils.path_utils import RAILDIR
 from rail.core.common_params import SHARED_PARAMS
@@ -43,7 +44,6 @@ class NNFlagInformer(CatInformer):
                           bands=SHARED_PARAMS,
                           ref_band=SHARED_PARAMS,
                           redshift_col=SHARED_PARAMS,
-                          convert_to_colors=Param(bool, True, msg="if True, keep ref_mag and convert other cols to colors"),
                           include_odds=Param(bool, False, msg="if True, compute ODDS and include in NN"),
                           nodecounts=Param(list, default_node_counts, msg="number of notes in NN"),
                           splitnum=Param(int, 5, msg="number of neural nets to train"),
@@ -80,14 +80,12 @@ class NNFlagInformer(CatInformer):
             npar = nbands + 1
         else:
             npar = nbands
-        print(f"nbands: {nbands}, npar: {npar}")
         colordata = np.zeros([npar, self.ngal])
         colordata[0,:] = data[refband]
         for i in range(nbands - 1):
             colordata[i+1, :] = data[bands[i]] - data[bands[i+1]]
         if self.odds is not None:
             colordata[npar - 1, :] = self.odds
-        print(f"colordata shape in train: {colordata.shape}")
         return colordata.T
 
     def _split_data(self, data, szdata, pzdata, trainfrac, seed):
@@ -125,11 +123,6 @@ class NNFlagInformer(CatInformer):
     def run(self):
         """compute the best fit prior parameters
         """
-
-        # convert training data format to numpy dictionary
-        #if tables_io.types.table_type(input) != 1:
-        #    photom_data = self._convert_table_format(photom_data, out_fmt_str="numpyDict")
-
         if self.config.hdf5_groupname:
             photom_data = self.get_data("input")[self.config.hdf5_groupname]
         else:  # pragma: no cover
@@ -152,21 +145,15 @@ class NNFlagInformer(CatInformer):
         else:
             self.odds = None
         
-        if self.config.convert_to_colors:
-            if self.config.ref_band not in self.config.bands or self.config.ref_band not in photom_data.keys():
-                raise KeyError(f"ref_band {self.config.ref_band} not in bands list!")
-            else:
-                color_data = self._compute_colors(photom_data, self.config.ref_band, self.config.bands)
-        else:  # pragma: no cover
-            raise ValueError("non color data not implemented")
+        if self.config.ref_band not in self.config.bands or self.config.ref_band not in photom_data.keys():
+            raise KeyError(f"ref_band {self.config.ref_band} not in bands list!")
+        else:
+            color_data = self._compute_colors(photom_data, self.config.ref_band, self.config.bands)
 
         if self.config.redshift_col not in photom_data.keys():
             raise KeyError(f"redshift column {self.config.redshift_col} not present in input data!")
         else:
             specz = photom_data[self.config.redshift_col]
-        
-        
-        # ngal = len(photom_data[self.config.ref_band])
 
         self._split_data(color_data, specz, zphot, self.config.trainfrac, self.config.seed)
 
@@ -204,8 +191,6 @@ class NNFlagInformer(CatInformer):
             es = EarlyStopping(patience=25, restore_best_weights=True)
             history = thismodel.fit(x_train, y_train, batch_size = 1000, epochs = self.epochs, verbose = 0,
                                     validation_data = (x_val, y_val), callbacks = [es])
-            #this_fit_val = np.squeeze(thismodel.predict(self.meanreprocess(self.features_val), verbose = 0))
-            #predictions = np.squeeze(thismodel.predict(self.meanreprocess(self.features_val)))
 
         predictions = []
         for xmod in self.nnlist:
@@ -214,14 +199,9 @@ class NNFlagInformer(CatInformer):
 
         self.model = dict(feature_avgs=self.feature_avgs,
                           feature_vars=self.feature_vars,
-                          xval=x_val,
-                          valsz=self.valsz,
-                          valpz=self.valpz,
                           nnlist=self.nnlist,
-                          include_odds=self.config.include_odds,
-                          singlepred=singlepred)
+                          include_odds=self.config.include_odds)
 
-        
         self.add_data("model", self.model)
 
 
@@ -238,12 +218,11 @@ class NNFlagEstimator(CatEstimator):
                           hdf5_groupname=SHARED_PARAMS,
                           ref_band=SHARED_PARAMS,
                           zphot_name=Param(str,"zmode", msg="name for point estimate ancil data to use"),
-                          convert_to_colors=Param(bool, True, msg="if True, keep ref_mag and convert other cols to colors"),                          
                          )
     inputs = [('pdfs', QPHandle),
               ('input', TableHandle),
               ('model', ModelHandle)]
-    outputs = [('output', TableHandle)]
+    outputs = [('output', Hdf5Handle)]
 
     def __init__(self, args, **kwargs):
         """Constructor, build the CatEstimator, then do BPZ specific setup
@@ -272,7 +251,6 @@ class NNFlagEstimator(CatEstimator):
             npar = nbands + 1
         else:
             npar = nbands
-        print(f"npar: {npar}")
         colordata = np.zeros([npar, self.ngal])
         colordata[0,:] = data[refband]
         for i in range(nbands - 1):
@@ -292,16 +270,11 @@ class NNFlagEstimator(CatEstimator):
         results.read(force=True)
         return results
 
-        
     #    def _process_chunk(self, start, end, data, first):
     def run(self):
         """
         Run flagger on 
         """
-
-        #qp_dstn = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=pdfs))
-        #qp_dstn.set_ancil(dict(zmode=zmode, zmean=zmean, tb=tb, todds=todds))
-        #self._do_chunk_output(qp_dstn, start, end, first, data=data)
 
         if self.config.hdf5_groupname:
             photom_data = self.get_data("input")[self.config.hdf5_groupname]
@@ -323,19 +296,18 @@ class NNFlagEstimator(CatEstimator):
         else:
             self.odds = None
 
-        if self.config.convert_to_colors:
-            if self.config.ref_band not in self.config.bands or self.config.ref_band not in photom_data.keys():
-                raise KeyError(f"ref_band {self.config.ref_band} not in bands list!")
-            else:
-                color_data = self._compute_colors(photom_data, self.config.ref_band, self.config.bands)
-        else:  # pragma: no cover
-            raise ValueError("non color data not implemented")
+        if self.config.ref_band not in self.config.bands or self.config.ref_band not in photom_data.keys():
+            raise KeyError(f"ref_band {self.config.ref_band} not in bands list!")
+        else:
+            color_data = self._compute_colors(photom_data, self.config.ref_band, self.config.bands)
         white_color_data = self.meanreprocess(color_data)
 
         predictions = []
         for xmod in self.knnmodels:
             predictions.append(xmod.predict(white_color_data, verbose=1))
         singlepred = np.average(predictions, axis=0)
-        outdict = dict(nncflag=singlepred)
+        outdict = dict(nncflag=singlepred.flatten())
+        if self.odds is not None:
+            outdict['ODDS'] = np.array(self.odds)
         self.add_data("output", outdict)
                                
