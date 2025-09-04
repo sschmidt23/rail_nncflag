@@ -1,10 +1,10 @@
 [project]
-name = "pz-rail-bpz"
+name = "pz-rail-nncflag"
 requires-python = ">=3.10"
 license = {file = "LICENSE"}
 readme = "README.md"
 authors = [
-    { name = "LSST DESC PZ WG", email = "samuel.j.schmidt@gmail.com" }
+    { name = "LSST DESC PZ WG", email = "samschmidt@ucdavis.edu" }
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -17,7 +17,8 @@ classifiers = [
 dynamic = ["version"]
 
 dependencies = [
-    "desc-bpz",
+    "keras",
+    "tensorflow",
     "pz-rail-base>=1.1.4",
     "qp-prob[full]",
 ]
@@ -40,7 +41,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
-write_to = "src/rail/bpz/_version.py"
+write_to = "src/rail/nncflag/_version.py"
 
 [tool.pytest.ini_options]
 testpaths = [
