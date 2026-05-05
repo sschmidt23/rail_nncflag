@@ -1,5 +1,7 @@
 import os
 import pytest
+import qp
+import tables_io
 from rail.core.stage import RailStage
 from rail.core.data import DataStore, TableHandle, QPHandle
 from rail.utils.path_utils import RAILDIR
@@ -15,8 +17,8 @@ validdata = os.path.join(RAILDIR, 'rail/examples_data/testdata/validation_10gal.
 trainens = "./tests/training_100gal_pdfs.hdf5"
 valens = "./tests/validation_10gal_pdfs.hdf5"
 
-DS = RailStage.data_store
-DS.__class__.allow_overwrite = True
+# DS = RailStage.data_store
+# DS.__class__.allow_overwrite = True
 
 
 @pytest.mark.parametrize(
@@ -40,11 +42,16 @@ def test_bpz_lite(include_odds, gname):
                          'model': f'testmodel_nnc_{gname}.pkl'}
     train_algo = nnc_flag.NNFlagInformer
     pz_algo = nnc_flag.NNFlagEstimator
-    DS.clear()
-    training_data = DS.read_file("training_data", TableHandle, traindata)
-    validation_data = DS.read_file("validation_data", TableHandle, validdata)
-    train_pdfs = DS.read_file("train_pdf", QPHandle, trainens)
-    val_pdfs = DS.read_file("val_pdf", QPHandle, valens)
+    # DS.clear()
+    # training_data = DS.read_file("training_data", TableHandle, traindata)
+    # validation_data = DS.read_file("validation_data", TableHandle, validdata)
+    # train_pdfs = DS.read_file("train_pdf", QPHandle, trainens)
+    # val_pdfs = DS.read_file("val_pdf", QPHandle, valens)
+    training_data = tables_io.read(traindata)
+    validation_data = tables_io.read(validdata)
+    train_pdfs = qp.read(trainens)
+    val_pdfs = qp.read(valens)
+
     train_pz = train_algo.make_stage(name=f"{gname}_train", **train_config_dict)
     train_pz.inform(training_data, train_pdfs)
     pz = pz_algo.make_stage(name=f"nnc_estimate_{gname}", **estim_config_dict)

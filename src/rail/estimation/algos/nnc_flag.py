@@ -16,6 +16,14 @@ from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, Hdf5H
 from rail.estimation.estimator import CatEstimator, CatInformer
 from rail.utils.path_utils import RAILDIR
 from rail.core.common_params import SHARED_PARAMS
+
+# Keras update to paths in May 2026
+# don't need to switch yet, but may eventually
+# need to update to the below paths:
+# import tensorflow as tf
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense
+
 from keras.models import Sequential
 from keras.layers import Dense
 # from keras.models import model_from_yaml
